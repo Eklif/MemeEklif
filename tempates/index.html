@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Scraping App</title>
+</head>
+<body>
+    <h1>Web Scraping App</h1>
+    <ul>
+        {% for item in data %}
+            <li>{{ item.get_text() }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+

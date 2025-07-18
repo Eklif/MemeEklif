@@ -25,6 +25,7 @@
 	}).then(response=>response.json())
 	   .then(data=>console.log("Массив отправлен:", data))
 	   .catch(error=> console.error("Ошибка отправки массива:", error));
+	   videoSources.pop();
 	}
 
 	//получаем ответ от сервера в переменную дд

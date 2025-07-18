@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang=”ru”>
+<head>
+<meta charset=”UTF-8">
+<title>Webscraper in Python using Flask</title>
+</head>
+
+<body>
+	<script src="script.js"></script>
+	<h1> ПРИВЕТ! Тут можно оправить мем на трансляцию</h1>
+	<div id="urls-list"></div>
+
+
+</div>
+
+<script>
+	const videoSources=[]; // массив в который добавляются ссылки
+	
+	// отправка массива JS в Flask
+	function myFetcher() {
+	fetch('/send', {
+		method: "POST",
+		headers: {"Content-Type": "application/json"},
+		body: JSON.stringify({array: videoSources}),
+	}).then(response=>response.json())
+	   .then(data=>console.log("Массив отправлен:", data))
+	   .catch(error=> console.error("Ошибка отправки массива:", error));
+	}
+
+	//получаем ответ от сервера в переменную дд
+	let dd='{{data}}';
+	
+	let aa=dd.replaceAll("&#34;", " ");
+	let bb=aa.split(", ")
+	let urls=bb.slice(0, 60);
+
+	urls.forEach(url => {
+		//Создаем контейнер
+		const container=document.createElement("div")
+		container.style.position="relative";
+		container.style.display="inline-block";
+		container.style.marign="10px";
+
+    		const item = document.createElement("video"); // Убрал лишний пробел после "video"
+    		item.src = url; // Исправлено: присваиваем url напрямую src
+    		item.autoplay = false;
+    		item.controls = true;
+    		item.muted = false;
+    		item.height = 240;
+    		item.width = 320;
+    		
+		
+		const customButton = document.createElement('button');
+    		customButton.textContent = 'Отправить на стрим';
+   		customButton.style.position = 'absolute';
+   		customButton.style.bottom = '10px';
+    		customButton.style.right = '10px';
+   		customButton.style.zIndex = '10';
+    		customButton.style.padding = '5px 10px';
+    		customButton.style.backgroundColor = '#ff5722';
+    		customButton.style.color = 'white';
+    		customButton.style.border = 'none';
+    		customButton.style.borderRadius = '4px';
+    		customButton.style.cursor = 'pointer';	
+		customButton.addEventListener('click',  () => {
+			myFetcher();
+			videoSources.push(item.src);
+			console.log("Добавлено видео:", item.src);
+			
+		});
+		// Добавляем видео и кнопку в контейнер
+		container.appendChild(item);
+    		container.appendChild(customButton);
+
+    		// Добавляем контейнер в список
+    		document.getElementById("urls-list").appendChild(container);
+});
+
+	
+</script>
+
+</body>
+</html>

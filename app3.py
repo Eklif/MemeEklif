@@ -1,7 +1,5 @@
-import threading
-
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 import os
 import time
 import requests
@@ -11,16 +9,43 @@ import json
 from collections import defaultdict
 from flask import jsonify
 import numpy as np
+from queue import Queue
+from threading import Thread 
+import eventlet
+#eventlet.monkey_patch()
+
 
 app3=Flask(__name__)
+app3.config['SECRET_KEY']='supersecret'
+socketio=SocketIO(app3, async_mode='threading') #запуск приложения
 
 base_url='https://mem-hub.ru/?sort=count'
 headers={
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 }
 
-url2=[]
+url2=[] #список  видео ссылок
 
+video_src=Queue() #Очередь для  ссылок
+
+
+@socketio.on('connect')#остелживаем подключение клиента
+def handle_connect():
+    print("Клиетн подключился")
+    
+def process_queue(): #фунция обраточик очереди запускается асинхронно т.к блокирует работу flask
+    while True:
+        data2=video_src.get()
+        socketio.emit("video_data", data2)#отправляем на html где video_data это событие
+        #eventlet.sleep(0)
+
+worker_thread=Thread(target=process_queue, daemon=True)
+worker_thread.start()
+video_src.join()
+#Запускаем функцию обработчик в отдельной потоке
+#socketio.start_background_task(process_queue())
+
+#Функиция парсинга ссылок
 def index1():
     response=requests.get(base_url, headers=headers)
     
@@ -74,19 +99,30 @@ def index1():
 
 index1()
 
-
+#оправляем списков ссылок на hmtl через Json
 @app3.route('/', methods=['GET', "POST"])
 def index():
     data=url2
     return render_template('index.html', data=json.dumps(data))
 
+#Оправка пользователем ссылки на видео на сервер
 @app3.route('/send', methods=["POST"])
 def send():
-    data=request.get_json()
-    array=data["array"]
+    data = request.get_json()
+    array = data['array']
+    video_src.put(array)
     print("Массив получен:", array)
-    return  jsonify({"message": "Массив отравлен успешно"})
-    
+    return  jsonify({"message": "Массив отравлен успешно"}) #jsonify функция отарвляющая ответ в формате json на html
+
+#Страничка с видео отправленными на стрим
+@app3.route('/send1')
+def send_page():
+    return render_template('send1.html')
+
+
         
 if __name__=="__main__":
-   app3.run(debug=True, port=2002)
+   socketio.run(app3, host='127.0.0.1', port=5008, debug=True)
+
+                
+

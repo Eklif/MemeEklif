@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель</title>
+</head>
+
+<body>
+	<div id="videomems"></div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+	<script>
+	//cоедениняем сокет
+	const socket=io("http://127.0.0.1:5008"); 
+	const videoDiv=document.getElementById('videomems');
+	socket.on("video_data", (data2) => {
+		console.log("Ссылка на видио получена", data2); // логи что ссылка пришла
+		const videoCont=document.createElement('div')
+		videoCont.classList.add('videomem');
+		videoCont.style.position="relative";
+		videoCont.style.display="inline-block";
+		videoCont.style.marign="10px";
+	
+		const imem=document.createElement('video');
+		imem.src=data2;
+		imem.autoplay = true;
+    		imem.controls = true;
+    		imem.muted = false;
+    		imem.height = 240;
+    		imem.width = 320;
+	
+		videoCont.appendChild(imem);
+		document.getElementById('videomems').appendChild(videoCont);
+	});
+	</script>
+</body>
+</html>

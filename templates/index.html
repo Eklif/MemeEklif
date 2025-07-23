@@ -6,7 +6,6 @@
 </head>
 
 <body>
-	<script src="script.js"></script>
 	<h1> ПРИВЕТ! Тут можно оправить мем на трансляцию</h1>
 	<div id="urls-list"></div>
 
@@ -25,7 +24,7 @@
 	}).then(response=>response.json())
 	   .then(data=>console.log("Массив отправлен:", data))
 	   .catch(error=> console.error("Ошибка отправки массива:", error));
-	   videoSources.pop();
+	videoSources.pop();
 	}
 
 	//получаем ответ от сервера в переменную дд

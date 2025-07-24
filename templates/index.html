@@ -26,13 +26,6 @@
 	   .catch(error=> console.error("Ошибка отправки массива:", error));
 	videoSources.pop();
 	}
-	// обработчик ответа от сервера при привышении лимита обращений
-	function myError(){
-	fetch('/send')
-		.then(response=>response.json())
-		.then(data=>console.log("Ответ получен:", data))
-		.catch(error=> console.error("Ошибка:", error));
-	}
 	
 	//получаем ответ от сервера в переменную дд выполняется эта часть
 	let dd='{{data}}';

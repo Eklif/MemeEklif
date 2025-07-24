@@ -13,9 +13,9 @@
 </div>
 
 <script>
-	const videoSources=[]; // массив в который добавляются ссылки
+	const videoSources=[]; // массив в который добавляются ссылки на видео от пользователей
 	
-	// отправка массива JS в Flask
+	// отправка массива JS в Flask выбор видео пользователем и отправка его
 	function myFetcher() {
 	fetch('/send', {
 		method: "POST",
@@ -26,8 +26,15 @@
 	   .catch(error=> console.error("Ошибка отправки массива:", error));
 	videoSources.pop();
 	}
-
-	//получаем ответ от сервера в переменную дд
+	// обработчик ответа от сервера при привышении лимита обращений
+	function myError(){
+	fetch('/send')
+		.then(response=>response.json())
+		.then(data=>console.log("Ответ получен:", data))
+		.catch(error=> console.error("Ошибка:", error));
+	}
+	
+	//получаем ответ от сервера в переменную дд выполняется эта часть
 	let dd='{{data}}';
 	
 	let aa=dd.replaceAll("&#34;", " ");
@@ -49,7 +56,7 @@
     		item.height = 240;
     		item.width = 320;
     		
-		
+		// создаем кастомную кнопку на видео которая оправляет ссылка на сервер
 		const customButton = document.createElement('button');
     		customButton.textContent = 'Отправить на стрим';
    		customButton.style.position = 'absolute';
@@ -65,6 +72,7 @@
 		customButton.addEventListener('click',  () => {
 			myFetcher();
 			videoSources.push(item.src);
+			myError()
 			console.log("Добавлено видео:", item.src);
 			
 		});

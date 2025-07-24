@@ -8,16 +8,26 @@ from urllib.parse import urljoin
 import json
 from collections import defaultdict
 from flask import jsonify
-import numpy as np
+import numpy as np #возможно эта шутка тут не нужна
 from queue import Queue
-from threading import Thread 
-import eventlet
+from threading import Thread
+from flask_limiter import Limiter #лимитер на обращения к HTTP Запросам
+from flask_limiter.util import get_remote_address
+
+#import eventlet
 #eventlet.monkey_patch()
 
 
 app3=Flask(__name__)
 app3.config['SECRET_KEY']='supersecret'
 socketio=SocketIO(app3, async_mode='threading') #запуск приложения
+
+#Запускаем лимитер
+Limiter_http=Limiter(
+    app=app3,
+    key_func=get_remote_address,
+    default_limits=["200/day", "50/hour"]
+)
 
 base_url='https://mem-hub.ru/?sort=count'
 headers={
@@ -33,16 +43,18 @@ video_src=Queue() #Очередь для  ссылок
 def handle_connect():
     print("Клиетн подключился")
     
-def process_queue(): #фунция обраточик очереди запускается асинхронно т.к блокирует работу flask
+def process_queue(): #фунция обработчик очереди запускается в отдельном потоке чтобы не блокировать работу Flask
     while True:
         data2=video_src.get()
         socketio.emit("video_data", data2)#отправляем на html где video_data это событие
         #eventlet.sleep(0)
 
+#Запуск через поток фунции выше
 worker_thread=Thread(target=process_queue, daemon=True)
 worker_thread.start()
 video_src.join()
-#Запускаем функцию обработчик в отдельной потоке
+
+#Запускаем функцию обработчик в отдельной потоке временно не работает
 #socketio.start_background_task(process_queue())
 
 #Функиция парсинга ссылок
@@ -107,6 +119,7 @@ def index():
 
 #Оправка пользователем ссылки на видео на сервер
 @app3.route('/send', methods=["POST"])
+@Limiter_http.limit("1 per 10 seconds")
 def send():
     data = request.get_json()
     array = data['array']
@@ -119,10 +132,12 @@ def send():
 def send_page():
     return render_template('send1.html')
 
-
+# Обрабочтик срабатывает при привышени лимита
+@app3.errorhandler(429)
+def ratelimit_error(error):
+    return jsonify({"error": "Слишком много запросов! Попробуйте через 10 секунд."}), 429
         
 if __name__=="__main__":
-   socketio.run(app3, host='127.0.0.1', port=5008, debug=True)
+   socketio.run(app3, host='127.0.0.1', port=6005, debug=True)
 
                 
-

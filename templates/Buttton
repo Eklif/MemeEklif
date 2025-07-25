@@ -1,0 +1,14 @@
+//Блокирует кнопку на 5 секунд
+addEventListener('click',()=>{
+  const buttDisable = document.getElementById('Button');
+  buttDisable.disabled = true;
+  console.log("Это так")
+  setTimeout(()=>{
+    if (buttDisable.disabled = true){
+      setTimeout(()=>{
+      buttDisable.disabled = false;
+     console.log("Это не так");
+    },5000)
+    }
+  })
+})

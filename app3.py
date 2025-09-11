@@ -8,7 +8,6 @@ from urllib.parse import urljoin
 import json
 from collections import defaultdict
 from flask import jsonify
-import numpy as np #возможно эта шутка тут не нужна
 from queue import Queue
 from threading import Thread
 from flask_limiter import Limiter #лимитер на обращения к HTTP Запросам
@@ -141,4 +140,5 @@ if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
 
                 
+
 

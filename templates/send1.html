@@ -13,7 +13,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 	<script>
 	//cоедениняем сокет
-	const socket=io("http://127.0.0.1:5008"); 
+	const socket=io("https://memeseklif.onrender.com"); 
 	const videoDiv=document.getElementById('videomems');
 	socket.on("video_data", (data2) => {
 		console.log("Ссылка на видио получена", data2); // логи что ссылка пришла
@@ -37,3 +37,4 @@
 	</script>
 </body>
 </html>
+

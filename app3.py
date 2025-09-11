@@ -138,6 +138,7 @@ def ratelimit_error(error):
     return jsonify({"error": "Слишком много запросов! Попробуйте через 10 секунд."}), 429
         
 if __name__=="__main__":
-   socketio.run(app3, host='127.0.0.1', port=6005, debug=True)
+   socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
 
                 
+

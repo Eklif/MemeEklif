@@ -51,7 +51,7 @@ def process_queue(): #фунция обработчик очереди запу�
 #Запуск через поток фунции выше
 worker_thread=Thread(target=process_queue, daemon=True)
 worker_thread.start()
-video_src.join()
+#video_src.join()
 
 #Запускаем функцию обработчик в отдельной потоке временно не работает
 #socketio.start_background_task(process_queue())
@@ -108,7 +108,7 @@ def index1():
 
 
 
-index1()
+
 
 #оправляем списков ссылок на hmtl через Json
 @app3.route('/', methods=['GET', "POST"])
@@ -140,5 +140,6 @@ if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
 
                 
+
 
 

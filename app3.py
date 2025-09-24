@@ -107,18 +107,6 @@ def index1():
                     url2.append(full_url)
 
 
-@app3.before_request
-def initialize_app():
-    """Инициализация при первом запросе"""
-    global app_initialized
-    if not app_initialized:
-        print("=== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ===")
-        # Запускаем парсинг
-        index1()
-        app_initialized = True
-        print("=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===")
-
-
 
 #оправляем списков ссылок на hmtl через Json
 @app3.route('/', methods=['GET', "POST"])
@@ -148,5 +136,6 @@ def ratelimit_error(error):
         
 if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
+
 
 

@@ -106,9 +106,16 @@ def index1():
                     
                     url2.append(full_url)
 
-@app3.before_first_request
-def first():
-    index1()
+first_request_done = False
+
+@app3.before_request
+def before_first_request():
+    global first_request_done
+    if not first_request_done:
+        # Код, который должен выполниться один раз при первом запросе
+        print("Первое обращение к приложению!")
+        index1()
+        first_request_done = True
 
 #оправляем списков ссылок на hmtl через Json
 @app3.route('/', methods=['GET', "POST"])
@@ -138,6 +145,7 @@ def ratelimit_error(error):
         
 if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
+
 
 
 

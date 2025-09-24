@@ -106,7 +106,7 @@ def index1():
                     
                     url2.append(full_url)
 
-@app.before_first_request
+@app3.before_first_request
 def first():
     index1()
 
@@ -138,6 +138,7 @@ def ratelimit_error(error):
         
 if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
+
 
 
 

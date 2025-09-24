@@ -36,6 +36,7 @@ headers={
 url2=[] #список  видео ссылок
 
 video_src=Queue() #Очередь для  ссылок
+app_initialized = False  # Флаг инициализации
 
 
 @socketio.on('connect')#остелживаем подключение клиента
@@ -106,14 +107,22 @@ def index1():
                     url2.append(full_url)
 
 
-
+@app3.before_request
+def initialize_app():
+    """Инициализация при первом запросе"""
+    global app_initialized
+    if not app_initialized:
+        print("=== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ===")
+        # Запускаем парсинг
+        index1()
+        app_initialized = True
+        print("=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===")
 
 
 
 #оправляем списков ссылок на hmtl через Json
 @app3.route('/', methods=['GET', "POST"])
 def index():
-    index1()
     data=url2
     return render_template('index.html', data=json.dumps(data))
 
@@ -139,4 +148,5 @@ def ratelimit_error(error):
         
 if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
+
 

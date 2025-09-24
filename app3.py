@@ -113,6 +113,7 @@ def index1():
 #оправляем списков ссылок на hmtl через Json
 @app3.route('/', methods=['GET', "POST"])
 def index():
+    index1()
     data=url2
     return render_template('index.html', data=json.dumps(data))
 
@@ -138,3 +139,4 @@ def ratelimit_error(error):
         
 if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
+

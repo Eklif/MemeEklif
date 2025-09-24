@@ -36,7 +36,7 @@ headers={
 url2=[] #список  видео ссылок
 
 video_src=Queue() #Очередь для  ссылок
-
+parsed_urls_cache=None
 
 @socketio.on('connect')#остелживаем подключение клиента
 def handle_connect():
@@ -44,9 +44,10 @@ def handle_connect():
     
 def process_queue(): #фунция обработчик очереди запускается в отдельном потоке чтобы не блокировать работу Flask
     while True:
-        data2=video_src.get()
-        socketio.emit("video_data", data2)#отправляем на html где video_data это событие
-        #eventlet.sleep(0)
+        try:
+            data2=video_src.get(timeout=1)
+            socketio.emit("video_data", data2)#отправляем на html где video_data это событие
+            #eventlet.sleep(0)
 
 #Запуск через поток фунции выше
 worker_thread=Thread(target=process_queue, daemon=True)
@@ -58,6 +59,15 @@ worker_thread.start()
 
 #Функиция парсинга ссылок
 def index1():
+    """Функция парсинга - вызывается только когда нужно"""
+    global parsed_urls_cache
+    # Если данные уже есть в кэше - возвращаем их
+    if parsed_urls_cache is not None:
+        return parsed_urls_cache
+    print("Начало парсинга...")
+    url2=[] #локальная переменная
+
+    
     response=requests.get(base_url, headers=headers)
     
     soup=BeautifulSoup(response.text, 'html.parser')
@@ -104,7 +114,8 @@ def index1():
                     full_url=urljoin(base_url, src)
                     
                     url2.append(full_url)
-
+    parsed_urls_cache=url2
+    return url2
 
 
 
@@ -140,6 +151,7 @@ if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
 
                 
+
 
 
 

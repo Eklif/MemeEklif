@@ -12,6 +12,7 @@ from queue import Queue
 from threading import Thread
 from flask_limiter import Limiter #лимитер на обращения к HTTP Запросам
 from flask_limiter.util import get_remote_address
+from datetime import datetime, timedelta
 
 #import eventlet
 #eventlet.monkey_patch()
@@ -34,6 +35,19 @@ headers={
 }
 
 url2=[] #список  видео ссылок
+last_update=None
+UPDATE_INTERVAL=6 #часов
+
+def get_video_data():
+    global url2, last_update
+
+    now=datetime.now()
+     # Если данных нет или прошло больше 6 часов
+    if not url2 or (last_update and (now-last_update).total_seconds()>UPDATE_INTERVAL*3600):
+         print("Обновляем данные")
+         index1()
+    return url2
+
 
 video_src=Queue() #Очередь для  ссылок
 app_initialized = False  # Флаг инициализации
@@ -42,7 +56,7 @@ app_initialized = False  # Флаг инициализации
 @socketio.on('connect')#остелживаем подключение клиента
 def handle_connect():
     print("Клиетн подключился")
-    
+
 def process_queue(): #фунция обработчик очереди запускается в отдельном потоке чтобы не блокировать работу Flask
     while True:
         data2=video_src.get()
@@ -59,8 +73,8 @@ worker_thread.start()
 
 #Функиция парсинга ссылок
 def index1():
-    response=requests.get(base_url, headers=headers)
-    
+    response=requests.get(base_url, headers=headers, proxies={"http": None, "https": None})
+
     soup=BeautifulSoup(response.text, 'html.parser')
 
     pagination = soup.find('div', class_='pagination2').find('ul', class_='pagination').find_all('a', class_='page-link')
@@ -71,7 +85,7 @@ def index1():
         if url:
             full_url=urljoin(base_url, url)
             unique_urls.add(full_url)
-            
+
     # Функция для сортировки URL
 
     def sort_key(url):
@@ -80,7 +94,7 @@ def index1():
         try:
            return int(url.split('/')[-1])
         except (ValueError, IndexError):
-            return float('inf')  # помещаем некорректные URL в конец       
+            return float('inf')  # помещаем некорректные URL в конец
 
     # Сортируем URL
     sorted_urls = sorted(unique_urls, key=sort_key)
@@ -89,7 +103,7 @@ def index1():
     print("Уникальные ссылки пагинации:")
     for i, url in enumerate(sorted_urls, 1):
         #print(f"{i}. {url}")
-    
+
         page_response = requests.get(url, headers=headers) #cкачиваем страницу HTML структуру
 
         if page_response.status_code==200:
@@ -97,30 +111,30 @@ def index1():
 
         #Ищем все теги <source> с type="video/mp4" или другими видеоформатами
             video_tags=soup.find_all('video')
-            
+
             for video in video_tags:
                 sources =video.find_all('source')
                 for source in sources:
                     src=source.get('src')
                     full_url=urljoin(base_url, src)
-                    
+
                     url2.append(full_url)
 
-first_request_done = False
+#first_request_done = False
 
-@app3.before_request
-def before_first_request():
-    global first_request_done
-    if not first_request_done:
+#@app3.before_request
+#def before_first_request():
+    #global first_request_done
+    #if not first_request_done:
         # Код, который должен выполниться один раз при первом запросе
-        print("Первое обращение к приложению!")
-        index1()
-        first_request_done = True
+        #print("Первое обращение к приложению!")
+        #index1()
+        #first_request_done = True
 
 #оправляем списков ссылок на hmtl через Json
 @app3.route('/', methods=['GET', "POST"])
 def index():
-    data=url2
+    data=get_video_data()
     return render_template('index.html', data=json.dumps(data))
 
 #Оправка пользователем ссылки на видео на сервер
@@ -142,9 +156,10 @@ def send_page():
 @app3.errorhandler(429)
 def ratelimit_error(error):
     return jsonify({"error": "Слишком много запросов! Попробуйте через 10 секунд."}), 429
-        
+
 if __name__=="__main__":
    socketio.run(app3, host='0.0.0.0', port=5000, debug=True)
+
 
 
 

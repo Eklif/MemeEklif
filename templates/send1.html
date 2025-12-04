@@ -13,10 +13,10 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 	<script>
 	//cоедениняем сокет
-	const socket = io(socketUrl, {
-    	transports: ['websocket', 'polling'],  // ✅ Сначала WebSocket, потом polling
-    	reconnection: true  // ✅ Автопереподключение
-	});
+	const socket=io("https://memeseklif.onrender.com", {
+            transports: ['websocket'],  // Принудительно используем WebSocket
+            upgrade: false
+    });
 	const videoDiv=document.getElementById('videomems');
 	socket.on("video_data", (data2) => {
 		console.log("Ссылка на видио получена", data2); // логи что ссылка пришла
@@ -40,6 +40,7 @@
 	</script>
 </body>
 </html>
+
 
 
 
